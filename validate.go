@@ -28,7 +28,13 @@ func NewValidator(tags map[string][]string) *Validator {
 	return &Validator{validate, tags}
 }
 
-func (s Validator) Validate(data any) error {
+func (s *Validator) RegisterValidation(tag string, fn func(val string) bool) {
+	s.validate.RegisterValidation(tag, func(e validator.FieldLevel) bool {
+		return fn(e.Field().String())
+	})
+}
+
+func (s *Validator) Validate(data any) error {
 	if err := s.validate.Struct(data); err != nil {
 		results := []string{}
 		for _, e := range err.(validator.ValidationErrors) {
