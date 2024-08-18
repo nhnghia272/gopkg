@@ -39,3 +39,6 @@ func main() {
 
 ## Mongo
 [go.mongodb.org/mongo-driver](go.mongodb.org/mongo-driver)
+
+## Ristretto
+[github.com/dgraph-io/ristretto](github.com/dgraph-io/ristretto)
