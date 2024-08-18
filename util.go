@@ -1,15 +1,5 @@
 package gopkg
 
-import (
-	"crypto/hmac"
-	"crypto/sha1"
-	"crypto/subtle"
-	"encoding/hex"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
-)
-
 func CopyArray[E comparable](src []E) []E {
 	dst := make([]E, len(src))
 	copy(dst, src)
@@ -79,40 +69,4 @@ func EveryFunc[E comparable](s []E, f func(E) bool) bool {
 		}
 	}
 	return true
-}
-
-func HashPassword(password string, cost int) string {
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), cost)
-	return string(bytes)
-}
-
-func VerifyPassword(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-func CreateSignature(data, secret string) string {
-	mac := hmac.New(sha1.New, []byte(secret))
-	mac.Write([]byte(data))
-	return hex.EncodeToString(mac.Sum(nil))
-}
-
-func VerifySignature(data, secret, signature string) bool {
-	payload := CreateSignature(data, secret)
-	return subtle.ConstantTimeCompare([]byte(payload), []byte(signature)) == 1
-}
-
-func ObjectID(id string) primitive.ObjectID {
-	oid, _ := primitive.ObjectIDFromHex(id)
-	return oid
-}
-
-func ObjectIDs(ids []string) []primitive.ObjectID {
-	oids := []primitive.ObjectID{}
-	for _, id := range ids {
-		if oid := ObjectID(id); !oid.IsZero() {
-			oids = append(oids, oid)
-		}
-	}
-	return oids
 }

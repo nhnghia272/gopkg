@@ -10,13 +10,7 @@ import (
 
 func init() {
 	logrus.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
-}
-
-// Level=panic|fatal|error|warn|info|debug|trace. Default=info
-func SetLevel(level string) {
-	if lv, err := logrus.ParseLevel(level); err != nil {
-		panic(err)
-	} else {
+	if lv, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL")); err == nil {
 		logrus.SetLevel(lv)
 	}
 }
