@@ -7,22 +7,22 @@ import (
 	"sync"
 )
 
-type Async struct {
+type async struct {
 	wg  sync.WaitGroup
 	one sync.Once
 	err error
 }
 
-func NewAsync() *Async {
-	return &Async{}
+func Async() *async {
+	return &async{}
 }
 
-func (s *Async) Wait() error {
+func (s *async) Wait() error {
 	s.wg.Wait()
 	return s.err
 }
 
-func (s *Async) Go(fn func()) *Async {
+func (s *async) Go(fn func()) *async {
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()

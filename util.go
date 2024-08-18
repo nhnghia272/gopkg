@@ -1,5 +1,9 @@
 package gopkg
 
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 func CopyArray[E comparable](src []E) []E {
 	dst := make([]E, len(src))
 	copy(dst, src)
@@ -69,4 +73,19 @@ func EveryFunc[E comparable](s []E, f func(E) bool) bool {
 		}
 	}
 	return true
+}
+
+func ObjectID(id string) primitive.ObjectID {
+	oid, _ := primitive.ObjectIDFromHex(id)
+	return oid
+}
+
+func ObjectIDs(ids []string) []primitive.ObjectID {
+	oids := []primitive.ObjectID{}
+	for _, id := range ids {
+		if oid := ObjectID(id); !oid.IsZero() {
+			oids = append(oids, oid)
+		}
+	}
+	return oids
 }

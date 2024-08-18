@@ -6,6 +6,11 @@ From your project directory:
 go get github.com/nhnghia272/gopkg
 ```
 
+Enviroment
+```
+LOG_LEVEL=info
+```
+
 ## Example
 ```go
 package main
@@ -14,7 +19,7 @@ import "github.com/nhnghia272/gopkg"
 
 func main() {
 	// Initialize a new Async
-	as := gopkg.NewAsync()
+	as := gopkg.Async()
 
 	// Add goroutine
 	as.Go(func() {
@@ -31,3 +36,6 @@ func main() {
 
 ## Logrus
 [github.com/sirupsen/logrus](github.com/sirupsen/logrus)
+
+## Mongo
+[go.mongodb.org/mongo-driver](go.mongodb.org/mongo-driver)

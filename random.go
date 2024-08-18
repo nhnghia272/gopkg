@@ -12,15 +12,6 @@ const (
 	charset        = charsetString + charsetNumber + charsetSpecial
 )
 
-func Random(length uint) string {
-	bytes := make([]byte, length)
-	for i := range bytes {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		bytes[i] = charset[r.Intn(len(charset))]
-	}
-	return string(bytes)
-}
-
 func RandomString(length uint) string {
 	bytes := make([]byte, length)
 	for i := range bytes {
@@ -44,6 +35,15 @@ func RandomSpecial(length uint) string {
 	for i := range bytes {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		bytes[i] = charsetSpecial[r.Intn(len(charsetSpecial))]
+	}
+	return string(bytes)
+}
+
+func Random(length uint) string {
+	bytes := make([]byte, length)
+	for i := range bytes {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		bytes[i] = charset[r.Intn(len(charset))]
 	}
 	return string(bytes)
 }
