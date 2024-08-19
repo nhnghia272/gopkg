@@ -36,9 +36,3 @@ func main() {
 
 ## Logrus
 [github.com/sirupsen/logrus](github.com/sirupsen/logrus)
-
-## Mongo
-[go.mongodb.org/mongo-driver](go.mongodb.org/mongo-driver)
-
-## Ristretto
-[github.com/dgraph-io/ristretto](github.com/dgraph-io/ristretto)

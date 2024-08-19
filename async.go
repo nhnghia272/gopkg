@@ -2,8 +2,6 @@ package gopkg
 
 import (
 	"fmt"
-	"os"
-	"runtime/debug"
 	"sync"
 )
 
@@ -30,7 +28,7 @@ func (s *async) Go(fn func()) *async {
 			if r := recover(); r != nil {
 				s.one.Do(func() {
 					s.err = fmt.Errorf("%v", r)
-					os.Stderr.WriteString(fmt.Sprintf("panic: %v\n%s\n", r, debug.Stack()))
+					Debug(r)
 				})
 			}
 		}()

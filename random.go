@@ -8,7 +8,7 @@ import (
 const (
 	charsetString  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	charsetNumber  = "0123456789"
-	charsetSpecial = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+	charsetSpecial = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 	charset        = charsetString + charsetNumber + charsetSpecial
 )
 

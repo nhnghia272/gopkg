@@ -1,7 +1,9 @@
 package gopkg
 
 import (
+	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/sirupsen/logrus"
 )
@@ -11,6 +13,10 @@ func init() {
 	if lv, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL")); err == nil {
 		logrus.SetLevel(lv)
 	}
+}
+
+func Debug(msg any) {
+	os.Stderr.WriteString(fmt.Sprintf("panic: %v\n%s\n", msg, debug.Stack()))
 }
 
 func Fatal(args ...any) {
