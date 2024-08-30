@@ -9,10 +9,18 @@ import (
 )
 
 func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
 	if lv, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL")); err == nil {
 		logrus.SetLevel(lv)
 	}
+	SetLogTextFormatter()
+}
+
+func SetLogJSONFormatter() {
+	logrus.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
+}
+
+func SetLogTextFormatter() {
+	logrus.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
 }
 
 func Debug(msg any) {
