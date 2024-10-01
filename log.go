@@ -2,6 +2,7 @@ package gopkg
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"runtime/debug"
 
@@ -55,34 +56,41 @@ func Infof(format string, args ...any) {
 	logrus.Infof(format, args...)
 }
 
+func Fields(kv map[string]any) *Log {
+	return &Log{logrus.WithFields(logrus.Fields(kv)), kv}
+}
+
 type Log struct {
 	entry *logrus.Entry
+	kv    map[string]any
 }
 
-func Fields(kv map[string]any) *Log {
-	return &Log{logrus.WithFields(logrus.Fields(kv))}
+func (s *Log) Fields(kv map[string]any) *Log {
+	maps.Insert(s.kv, maps.All(kv))
+	s.entry = s.entry.WithFields(logrus.Fields(s.kv))
+	return s
 }
 
-func (s Log) Error(args ...any) {
+func (s *Log) Error(args ...any) {
 	s.entry.Errorln(args...)
 }
 
-func (s Log) Warn(args ...any) {
+func (s *Log) Warn(args ...any) {
 	s.entry.Warnln(args...)
 }
 
-func (s Log) Info(args ...any) {
+func (s *Log) Info(args ...any) {
 	s.entry.Infoln(args...)
 }
 
-func (s Log) Errorf(format string, args ...any) {
+func (s *Log) Errorf(format string, args ...any) {
 	s.entry.Errorf(format, args...)
 }
 
-func (s Log) Warnf(format string, args ...any) {
+func (s *Log) Warnf(format string, args ...any) {
 	s.entry.Warnf(format, args...)
 }
 
-func (s Log) Infof(format string, args ...any) {
+func (s *Log) Infof(format string, args ...any) {
 	s.entry.Infof(format, args...)
 }
