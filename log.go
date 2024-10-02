@@ -71,6 +71,10 @@ func (s *Log) Fields(kv map[string]any) *Log {
 	return s
 }
 
+func (s *Log) Values() map[string]any {
+	return s.kv
+}
+
 func (s *Log) Error(args ...any) {
 	s.entry.Errorln(args...)
 }
