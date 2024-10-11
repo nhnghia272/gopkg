@@ -1,37 +1,21 @@
 package gopkg
 
 import (
+	"errors"
 	"hash/fnv"
 	"sync"
 	"time"
 )
 
-type CacheShard []*cache
+type CacheShard[E comparable] []*cache[E]
 
-type cache struct {
+type cache[E comparable] struct {
 	sync.RWMutex
-	items   map[string]any
+	items   map[string]E
 	expires map[string]time.Time
 }
 
-func NewCacheShard(shard uint64) CacheShard {
-	m := make(CacheShard, shard)
-	for i := 0; i < int(shard); i++ {
-		m[i] = &cache{
-			items:   make(map[string]any),
-			expires: make(map[string]time.Time),
-		}
-		Async().Go(func() {
-			for {
-				m[i].clean()
-				time.Sleep(15 * time.Second)
-			}
-		})
-	}
-	return m
-}
-
-func (s *cache) clean() {
+func (s *cache[E]) clean() {
 	s.Lock()
 	defer s.Unlock()
 	keys := []string{}
@@ -46,42 +30,98 @@ func (s *cache) clean() {
 	}
 }
 
-func (s CacheShard) getShard(key string) *cache {
+type CacheConfig struct {
+	Shard uint64
+	Clean time.Duration
+}
+
+func configDefault(config ...CacheConfig) CacheConfig {
+	if len(config) < 1 {
+		return CacheConfig{Shard: 1, Clean: 30 * time.Second}
+	}
+	cfg := config[0]
+	if cfg.Shard <= 0 {
+		cfg.Shard = 1
+	}
+	if uint64(cfg.Clean) <= 0 {
+		cfg.Clean = 30 * time.Second
+	}
+	return cfg
+}
+
+func NewCacheShard[E comparable](config ...CacheConfig) CacheShard[E] {
+	cfg := configDefault(config...)
+	m := make(CacheShard[E], cfg.Shard)
+	for i := 0; i < int(cfg.Shard); i++ {
+		m[i] = &cache[E]{
+			items:   make(map[string]E),
+			expires: make(map[string]time.Time),
+		}
+		Async().Go(func() {
+			for {
+				m[i].clean()
+				time.Sleep(cfg.Clean)
+			}
+		})
+	}
+	return m
+}
+
+func (s CacheShard[E]) acquire(key string) *cache[E] {
 	h := fnv.New32a()
 	h.Write([]byte(key))
 	return s[uint(h.Sum32())%uint(len(s))]
 }
 
-func (s CacheShard) Set(key string, val any, exp time.Duration) {
-	shard := s.getShard(key)
-	shard.Lock()
-	defer shard.Unlock()
-	shard.items[key] = val
-	shard.expires[key] = time.Now().Add(exp)
-}
+func (s CacheShard[E]) Get(key string) (E, error) {
+	shard := s.acquire(key)
 
-func (s CacheShard) Get(key string) (any, bool) {
-	shard := s.getShard(key)
 	shard.RLock()
 	defer shard.RUnlock()
 
 	val, ok := shard.items[key]
 	if !ok {
-		return nil, false
+		return val, errors.New("key not found")
 	}
 	if exp := shard.expires[key]; exp.Before(time.Now()) {
 		delete(shard.items, key)
 		delete(shard.expires, key)
-		return nil, false
+		return val, errors.New("key is expired")
 	}
 
-	return val, ok
+	return val, nil
 }
 
-func (s CacheShard) Del(key string) {
-	shard := s.getShard(key)
+func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
+	shard := s.acquire(key)
+
 	shard.Lock()
 	defer shard.Unlock()
+
+	shard.items[key] = val
+	shard.expires[key] = time.Now().Add(exp)
+
+	return nil
+}
+
+func (s CacheShard[E]) Delete(key string) error {
+	shard := s.acquire(key)
+
+	shard.Lock()
+	defer shard.Unlock()
+
 	delete(shard.items, key)
 	delete(shard.expires, key)
+
+	return nil
+}
+
+func (s CacheShard[E]) Reset() error {
+	for _, v := range s {
+		v.Lock()
+		defer v.Unlock()
+		v.items = make(map[string]E)
+		v.expires = make(map[string]time.Time)
+	}
+	return nil
 }
