@@ -1,5 +1,7 @@
 package gopkg
 
+import "encoding/json"
+
 func CopyArray[E comparable](src []E) []E {
 	dst := make([]E, len(src))
 	copy(dst, src)
@@ -13,6 +15,14 @@ func CopyArray2D[E comparable](s [][]E) [][]E {
 		copy(c[i], v)
 	}
 	return c
+}
+
+func Convert[E1, E2 comparable](src E1, des E2) error {
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, des)
 }
 
 func UniqueFunc[E1, E2 comparable](s []E1, f func(E1) E2) []E1 {
