@@ -1,10 +1,10 @@
 package gopkg
 
-func Pointer[E comparable](v E) *E {
+func Pointer[E any](v E) *E {
 	return &v
 }
 
-func PointerSlice[E comparable](vs []E) []*E {
+func PointerSlice[E any](vs []E) []*E {
 	ps := make([]*E, len(vs))
 	for i, v := range vs {
 		vv := v
@@ -13,7 +13,7 @@ func PointerSlice[E comparable](vs []E) []*E {
 	return ps
 }
 
-func PointerMap[E comparable](vs map[string]E) map[string]*E {
+func PointerMap[E any](vs map[string]E) map[string]*E {
 	ps := make(map[string]*E, len(vs))
 	for k, v := range vs {
 		vv := v
@@ -22,14 +22,14 @@ func PointerMap[E comparable](vs map[string]E) map[string]*E {
 	return ps
 }
 
-func Value[E comparable](p *E) E {
+func Value[E any](p *E) E {
 	if p == nil {
 		return *new(E)
 	}
 	return *p
 }
 
-func ValueSlice[E comparable](ps []*E) []E {
+func ValueSlice[E any](ps []*E) []E {
 	vs := make([]E, len(ps))
 	for i, p := range ps {
 		pp := p
@@ -42,7 +42,7 @@ func ValueSlice[E comparable](ps []*E) []E {
 	return vs
 }
 
-func ValueMap[E comparable](ps map[string]*E) map[string]E {
+func ValueMap[E any](ps map[string]*E) map[string]E {
 	vs := make(map[string]E, len(ps))
 	for k, p := range ps {
 		pp := p

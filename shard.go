@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-type CacheShard[E comparable] []*cache[E]
+type CacheShard[E any] []*cache[E]
 
-type cache[E comparable] struct {
+type cache[E any] struct {
 	sync.RWMutex
 	items   map[string]E
 	expires map[string]time.Time
@@ -49,7 +49,7 @@ func configDefault(config ...CacheConfig) CacheConfig {
 	return cfg
 }
 
-func NewCacheShard[E comparable](config ...CacheConfig) CacheShard[E] {
+func NewCacheShard[E any](config ...CacheConfig) CacheShard[E] {
 	cfg := configDefault(config...)
 	m := make(CacheShard[E], cfg.Shard)
 	for i := 0; i < int(cfg.Shard); i++ {

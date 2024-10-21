@@ -2,13 +2,13 @@ package gopkg
 
 import "encoding/json"
 
-func CopyArray[E comparable](src []E) []E {
+func CopyArray[E any](src []E) []E {
 	dst := make([]E, len(src))
 	copy(dst, src)
 	return dst
 }
 
-func CopyArray2D[E comparable](s [][]E) [][]E {
+func CopyArray2D[E any](s [][]E) [][]E {
 	c := make([][]E, len(s))
 	for i, v := range s {
 		c[i] = make([]E, len(v))
@@ -17,7 +17,7 @@ func CopyArray2D[E comparable](s [][]E) [][]E {
 	return c
 }
 
-func Convert[E1, E2 comparable](src E1, des E2) error {
+func Convert[E1, E2 any](src E1, des E2) error {
 	bytes, err := json.Marshal(src)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func Convert[E1, E2 comparable](src E1, des E2) error {
 	return json.Unmarshal(bytes, des)
 }
 
-func UniqueFunc[E1, E2 comparable](s []E1, f func(E1) E2) []E1 {
+func UniqueFunc[E1 any, E2 comparable](s []E1, f func(E1) E2) []E1 {
 	s2 := make([]E1, 0)
 	m2 := make(map[E2]E1)
 	for _, v := range s {
@@ -38,7 +38,7 @@ func UniqueFunc[E1, E2 comparable](s []E1, f func(E1) E2) []E1 {
 	return s2
 }
 
-func MapFunc[E1, E2 comparable](s []E1, f func(E1) E2) []E2 {
+func MapFunc[E1, E2 any](s []E1, f func(E1) E2) []E2 {
 	s2 := make([]E2, len(s))
 	for i, v := range s {
 		s2[i] = f(v)
@@ -46,7 +46,7 @@ func MapFunc[E1, E2 comparable](s []E1, f func(E1) E2) []E2 {
 	return s2
 }
 
-func FilterFunc[E comparable](s []E, f func(E) bool) []E {
+func FilterFunc[E any](s []E, f func(E) bool) []E {
 	s2 := make([]E, 0)
 	for _, v := range s {
 		if f(v) {
@@ -56,14 +56,14 @@ func FilterFunc[E comparable](s []E, f func(E) bool) []E {
 	return s2
 }
 
-func ReduceFunc[E1, E2 comparable](s []E1, a E2, f func(a E2, e E1, i int) E2) E2 {
+func ReduceFunc[E1, E2 any](s []E1, a E2, f func(a E2, e E1, i int) E2) E2 {
 	for i, v := range s {
 		a = f(a, v, i)
 	}
 	return a
 }
 
-func SomeFunc[E comparable](s []E, f func(E) bool) bool {
+func SomeFunc[E any](s []E, f func(E) bool) bool {
 	for _, v := range s {
 		if f(v) {
 			return true
@@ -72,7 +72,7 @@ func SomeFunc[E comparable](s []E, f func(E) bool) bool {
 	return false
 }
 
-func EveryFunc[E comparable](s []E, f func(E) bool) bool {
+func EveryFunc[E any](s []E, f func(E) bool) bool {
 	for _, v := range s {
 		if !f(v) {
 			return false
