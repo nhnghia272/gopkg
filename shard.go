@@ -117,11 +117,42 @@ func (s CacheShard[E]) Delete(key string) error {
 }
 
 func (s CacheShard[E]) Reset() error {
-	for _, v := range s {
-		v.Lock()
-		defer v.Unlock()
-		v.items = make(map[string]E)
-		v.expires = make(map[string]time.Time)
+	for _, shard := range s {
+		shard.Lock()
+		defer shard.Unlock()
+
+		shard.items = make(map[string]E)
+		shard.expires = make(map[string]time.Time)
 	}
 	return nil
+}
+
+func (s CacheShard[E]) Keys() []string {
+	keys := []string{}
+	for _, shard := range s {
+		shard.Lock()
+		defer shard.Unlock()
+
+		for key := range shard.items {
+			if exp := shard.expires[key]; exp.After(time.Now()) {
+				keys = append(keys, key)
+			}
+		}
+	}
+	return keys
+}
+
+func (s CacheShard[E]) Values() []E {
+	values := []E{}
+	for _, shard := range s {
+		shard.Lock()
+		defer shard.Unlock()
+
+		for key, value := range shard.items {
+			if exp := shard.expires[key]; exp.After(time.Now()) {
+				values = append(values, value)
+			}
+		}
+	}
+	return values
 }
