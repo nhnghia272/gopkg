@@ -56,6 +56,15 @@ func FilterFunc[E any](s []E, f func(E) bool) []E {
 	return s2
 }
 
+func FindFunc[E any](s []E, f func(E) bool) (E, bool) {
+	for _, v := range s {
+		if f(v) {
+			return v, true
+		}
+	}
+	return *new(E), false
+}
+
 func ReduceFunc[E1, E2 any](s []E1, a E2, f func(a E2, e E1, i int) E2) E2 {
 	for i, v := range s {
 		a = f(a, v, i)
