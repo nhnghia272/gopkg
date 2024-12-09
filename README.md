@@ -6,16 +6,15 @@ From your project directory:
 go get github.com/nhnghia272/gopkg
 ```
 
-Enviroment
-```
-LOG_LEVEL=info
-```
-
 ## Example
 ```go
 package main
 
-import "github.com/nhnghia272/gopkg"
+import (
+	"log"
+
+	"github.com/nhnghia272/gopkg"
+)
 
 func main() {
 	// Initialize a new Async
@@ -24,15 +23,19 @@ func main() {
 	// Add goroutine
 	as.Go(func() {
 		password := gopkg.Random(20)
-		gopkg.Info("RandomPassword:", password)
+		log.Println("RandomPassword:", password)
 	})
+
+	arr := []int{1, 2, 3, 4, 5}
+	v, ok := gopkg.FindFunc(arr, func(v int) bool {
+		return v == 6
+	})
+	log.Println(v, ok)
 
 	// Wait goroutine finish
 	if err := as.Wait(); err != nil {
-		gopkg.Error(err)
+		log.Println(err)
 	}
 }
-```
 
-## Logrus
-[github.com/sirupsen/logrus](github.com/sirupsen/logrus)
+```
