@@ -31,11 +31,11 @@ func (s *cache[E]) clean() {
 }
 
 type CacheConfig struct {
-	Shard uint64
+	Shard int64
 	Clean time.Duration
 }
 
-func configDefault(config ...CacheConfig) CacheConfig {
+func cacheConfigDefault(config ...CacheConfig) CacheConfig {
 	if len(config) < 1 {
 		return CacheConfig{Shard: 1, Clean: 30 * time.Second}
 	}
@@ -43,28 +43,33 @@ func configDefault(config ...CacheConfig) CacheConfig {
 	if cfg.Shard <= 0 {
 		cfg.Shard = 1
 	}
-	if uint64(cfg.Clean) <= 0 {
+	if int64(cfg.Clean) <= 0 {
 		cfg.Clean = 30 * time.Second
 	}
 	return cfg
 }
 
 func NewCacheShard[E any](config ...CacheConfig) CacheShard[E] {
-	cfg := configDefault(config...)
-	m := make(CacheShard[E], cfg.Shard)
+	var (
+		as     = Async()
+		cfg    = cacheConfigDefault(config...)
+		shards = make(CacheShard[E], cfg.Shard)
+	)
+
 	for i := 0; i < int(cfg.Shard); i++ {
-		m[i] = &cache[E]{
+		shards[i] = &cache[E]{
 			items:   make(map[string]E),
 			expires: make(map[string]time.Time),
 		}
-		Async().Go(func() {
+		as.Go(func() {
 			for {
-				m[i].clean()
+				shards[i].clean()
 				time.Sleep(cfg.Clean)
 			}
 		})
 	}
-	return m
+
+	return shards
 }
 
 func (s CacheShard[E]) acquire(key string) *cache[E] {
