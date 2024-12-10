@@ -28,31 +28,31 @@ func main() {
 
 	arr := []int{1, 2, 3, 4, 5}
 
-	log.Println(gopkg.UniqueFunc(arr, func(e int, i int) int {
+	log.Println(gopkg.UniqueFunc(arr, func(e int) int {
 		return e
 	}))
 
-	log.Println(gopkg.MapFunc(arr, func(e int, i int) int {
+	log.Println(gopkg.MapFunc(arr, func(e int) int {
 		return e * 2
 	}))
 
-	log.Println(gopkg.FilterFunc(arr, func(e int, i int) bool {
+	log.Println(gopkg.FilterFunc(arr, func(e int) bool {
 		return e%2 == 0
 	}))
 
-	log.Println(gopkg.FindFunc(arr, func(e int, i int) bool {
+	log.Println(gopkg.FindFunc(arr, func(e int) bool {
 		return e == 3
 	}))
 
-	log.Println(gopkg.ReduceFunc(arr, 0, func(a int, e int, i int) int {
+	log.Println(gopkg.ReduceFunc(arr, 0, func(a int, e int) int {
 		return a + e
 	}))
 
-	log.Println(gopkg.SomeFunc(arr, func(e int, i int) bool {
+	log.Println(gopkg.SomeFunc(arr, func(e int) bool {
 		return e == 3
 	}))
 
-	log.Println(gopkg.EveryFunc(arr, func(e int, i int) bool {
+	log.Println(gopkg.EveryFunc(arr, func(e int) bool {
 		return e%2 == 0
 	}))
 
