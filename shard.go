@@ -37,14 +37,14 @@ type CacheConfig struct {
 
 func cacheConfigDefault(config ...CacheConfig) CacheConfig {
 	if len(config) < 1 {
-		return CacheConfig{Shard: 1, Clean: 30 * time.Second}
+		return CacheConfig{Shard: 1, Clean: time.Second * 30}
 	}
 	cfg := config[0]
 	if cfg.Shard <= 0 {
 		cfg.Shard = 1
 	}
 	if int64(cfg.Clean) <= 0 {
-		cfg.Clean = 30 * time.Second
+		cfg.Clean = time.Second * 30
 	}
 	return cfg
 }
