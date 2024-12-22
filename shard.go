@@ -35,24 +35,20 @@ type CacheConfig struct {
 	Clean time.Duration
 }
 
-func cacheConfigDefault(config ...CacheConfig) CacheConfig {
-	if len(config) < 1 {
-		return CacheConfig{Shard: 1, Clean: time.Second * 30}
-	}
-	cfg := config[0]
-	if cfg.Shard <= 0 {
-		cfg.Shard = 1
-	}
-	if int64(cfg.Clean) <= 0 {
-		cfg.Clean = time.Second * 30
-	}
-	return cfg
-}
-
 func NewCacheShard[E any](config ...CacheConfig) CacheShard[E] {
+	cfg := CacheConfig{Shard: 1, Clean: time.Second * 30}
+
+	if len(config) > 0 {
+		if config[0].Shard > 0 {
+			cfg.Shard = config[0].Shard
+		}
+		if int64(config[0].Clean) > 0 {
+			cfg.Clean = config[0].Clean
+		}
+	}
+
 	var (
 		as     = Async()
-		cfg    = cacheConfigDefault(config...)
 		shards = make(CacheShard[E], cfg.Shard)
 	)
 
