@@ -7,8 +7,7 @@ func Pointer[E any](v E) *E {
 func PointerSlice[E any](vs []E) []*E {
 	ps := make([]*E, len(vs))
 	for i, v := range vs {
-		vv := v
-		ps[i] = &vv
+		ps[i] = Pointer(v)
 	}
 	return ps
 }
@@ -16,8 +15,7 @@ func PointerSlice[E any](vs []E) []*E {
 func PointerMap[E any](vs map[string]E) map[string]*E {
 	ps := make(map[string]*E, len(vs))
 	for k, v := range vs {
-		vv := v
-		ps[k] = &vv
+		ps[k] = Pointer(v)
 	}
 	return ps
 }
@@ -32,12 +30,7 @@ func Value[E any](p *E) E {
 func ValueSlice[E any](ps []*E) []E {
 	vs := make([]E, len(ps))
 	for i, p := range ps {
-		pp := p
-		if pp == nil {
-			vs[i] = *new(E)
-		} else {
-			vs[i] = *pp
-		}
+		vs[i] = Value(p)
 	}
 	return vs
 }
@@ -45,12 +38,7 @@ func ValueSlice[E any](ps []*E) []E {
 func ValueMap[E any](ps map[string]*E) map[string]E {
 	vs := make(map[string]E, len(ps))
 	for k, p := range ps {
-		pp := p
-		if pp == nil {
-			vs[k] = *new(E)
-		} else {
-			vs[k] = *pp
-		}
+		vs[k] = Value(p)
 	}
 	return vs
 }

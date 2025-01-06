@@ -18,7 +18,7 @@ type cache[E any] struct {
 func (s *cache[E]) clean() {
 	s.Lock()
 	defer s.Unlock()
-	keys := []string{}
+	keys := make([]string, 0)
 	for key, exp := range s.expires {
 		if exp.Before(time.Now()) {
 			keys = append(keys, key)
@@ -129,7 +129,7 @@ func (s CacheShard[E]) Reset() error {
 }
 
 func (s CacheShard[E]) Keys() []string {
-	keys := []string{}
+	keys := make([]string, 0)
 	for _, shard := range s {
 		shard.Lock()
 		defer shard.Unlock()
@@ -144,7 +144,7 @@ func (s CacheShard[E]) Keys() []string {
 }
 
 func (s CacheShard[E]) Values() []E {
-	values := []E{}
+	values := make([]E, 0)
 	for _, shard := range s {
 		shard.Lock()
 		defer shard.Unlock()
