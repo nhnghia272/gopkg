@@ -58,12 +58,12 @@ func FilterFunc[E any](s []E, f func(e E) bool) []E {
 }
 
 func FilterAsyncFunc[E any](s []E, f func(e E) bool) ([]E, error) {
-	s2 := NewCacheShard[E](CacheConfig{Shard: len(s), Clean: time.Hour * 24})
+	s2 := NewCacheShard[E](CacheConfig{Shard: len(s), Clean: time.Hour})
 	as := Async()
 	for i, v := range s {
 		as.Go(func() {
 			if f(v) {
-				s2.Set(strconv.Itoa(i), v, time.Hour*24)
+				s2.SetNoExpire(strconv.Itoa(i), v)
 			}
 		})
 	}

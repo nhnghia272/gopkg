@@ -20,7 +20,7 @@ func (s *cache[E]) clean() {
 	defer s.Unlock()
 	keys := make([]string, 0)
 	for key, exp := range s.expires {
-		if exp.Before(time.Now()) {
+		if !exp.IsZero() && exp.Before(time.Now()) {
 			keys = append(keys, key)
 		}
 	}
@@ -84,7 +84,7 @@ func (s CacheShard[E]) Get(key string) (E, error) {
 	if !ok {
 		return val, errors.New("key not found")
 	}
-	if exp := shard.expires[key]; exp.Before(time.Now()) {
+	if exp := shard.expires[key]; !exp.IsZero() && exp.Before(time.Now()) {
 		delete(shard.items, key)
 		delete(shard.expires, key)
 		return val, errors.New("key is expired")
@@ -101,6 +101,17 @@ func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
 
 	shard.items[key] = val
 	shard.expires[key] = time.Now().Add(exp)
+
+	return nil
+}
+
+func (s CacheShard[E]) SetNoExpire(key string, val E) error {
+	shard := s.acquire(key)
+
+	shard.Lock()
+	defer shard.Unlock()
+
+	shard.items[key] = val
 
 	return nil
 }
@@ -135,7 +146,7 @@ func (s CacheShard[E]) Keys() []string {
 		defer shard.Unlock()
 
 		for key := range shard.items {
-			if exp := shard.expires[key]; exp.After(time.Now()) {
+			if exp := shard.expires[key]; exp.IsZero() || exp.After(time.Now()) {
 				keys = append(keys, key)
 			}
 		}
@@ -150,7 +161,7 @@ func (s CacheShard[E]) Values() []E {
 		defer shard.Unlock()
 
 		for key, value := range shard.items {
-			if exp := shard.expires[key]; exp.After(time.Now()) {
+			if exp := shard.expires[key]; exp.IsZero() || exp.After(time.Now()) {
 				values = append(values, value)
 			}
 		}
