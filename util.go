@@ -1,21 +1,10 @@
 package gopkg
 
-import "encoding/json"
-
-func CopyArray[E any](src []E) []E {
-	dst := make([]E, len(src))
-	copy(dst, src)
-	return dst
-}
-
-func CopyArray2D[E any](s [][]E) [][]E {
-	c := make([][]E, len(s))
-	for i, v := range s {
-		c[i] = make([]E, len(v))
-		copy(c[i], v)
-	}
-	return c
-}
+import (
+	"encoding/json"
+	"strconv"
+	"time"
+)
 
 func Convert[E1, E2 any](src E1, des E2) error {
 	bytes, err := json.Marshal(src)
@@ -46,6 +35,18 @@ func MapFunc[E1, E2 any](s []E1, f func(e E1) E2) []E2 {
 	return s2
 }
 
+func MapAsyncFunc[E1, E2 any](s []E1, f func(e E1) E2) ([]E2, error) {
+	s2 := make([]E2, len(s))
+	as := Async()
+	for i, v := range s {
+		as.Go(func() { s2[i] = f(v) })
+	}
+	if err := as.Wait(); err != nil {
+		return nil, err
+	}
+	return s2, nil
+}
+
 func FilterFunc[E any](s []E, f func(e E) bool) []E {
 	s2 := make([]E, 0)
 	for _, v := range s {
@@ -54,6 +55,22 @@ func FilterFunc[E any](s []E, f func(e E) bool) []E {
 		}
 	}
 	return s2
+}
+
+func FilterAsyncFunc[E any](s []E, f func(e E) bool) ([]E, error) {
+	s2 := NewCacheShard[E](CacheConfig{Shard: len(s), Clean: time.Hour * 24})
+	as := Async()
+	for i, v := range s {
+		as.Go(func() {
+			if f(v) {
+				s2.Set(strconv.Itoa(i), v, time.Hour*24)
+			}
+		})
+	}
+	if err := as.Wait(); err != nil {
+		return nil, err
+	}
+	return s2.Values(), nil
 }
 
 func FindFunc[E any](s []E, f func(e E) bool) (E, bool) {
