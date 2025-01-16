@@ -100,18 +100,10 @@ func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
 	defer shard.Unlock()
 
 	shard.items[key] = val
-	shard.expires[key] = time.Now().Add(exp)
 
-	return nil
-}
-
-func (s CacheShard[E]) SetNoExpire(key string, val E) error {
-	shard := s.acquire(key)
-
-	shard.Lock()
-	defer shard.Unlock()
-
-	shard.items[key] = val
+	if exp >= 0 {
+		shard.expires[key] = time.Now().Add(exp)
+	}
 
 	return nil
 }
