@@ -48,14 +48,6 @@ func main() {
 		return a + e
 	}))
 
-	log.Println(gopkg.SomeFunc(arr, func(e int) bool {
-		return e == 3
-	}))
-
-	log.Println(gopkg.EveryFunc(arr, func(e int) bool {
-		return e%2 == 0
-	}))
-
 	// Wait goroutine finish
 	if err := as.Wait(); err != nil {
 		log.Println(err)
