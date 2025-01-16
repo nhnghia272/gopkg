@@ -12,21 +12,18 @@ func Convert[E1, E2 any](src E1, des E2) error {
 	return json.Unmarshal(bytes, des)
 }
 
-func LoopFunc[E any](s []E, f func(e E)) {
-	for _, v := range s {
-		f(v)
+func LoopFunc[E any](s []E, f func(i int, e E)) {
+	for i, v := range s {
+		f(i, v)
 	}
 }
 
-func LoopAsyncFunc[E any](s []E, f func(e E), wait bool) error {
+func LoopParallelFunc[E any](s []E, f func(i int, e E)) error {
 	as := Async()
-	for _, v := range s {
-		as.Go(func() { f(v) })
+	for i, v := range s {
+		as.Go(func() { f(i, v) })
 	}
-	if wait {
-		return as.Wait()
-	}
-	return nil
+	return as.Wait()
 }
 
 func UniqueFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) []E1 {
