@@ -12,23 +12,23 @@ func Convert[E1, E2 any](src E1, des E2) error {
 	return json.Unmarshal(bytes, des)
 }
 
-func LoopFunc[E any](s []E, f func(i int, e E)) {
-	for i, v := range s {
-		f(i, v)
+func LoopFunc[E any](s []E, f func(e E)) {
+	for _, v := range s {
+		f(v)
 	}
 }
 
-func LoopParallelFunc[E any](s []E, f func(i int, e E)) error {
+func LoopParallelFunc[E any](s []E, f func(e E)) error {
 	as := Async()
-	for i, v := range s {
-		as.Go(func() { f(i, v) })
+	for _, v := range s {
+		as.Go(func() { f(v) })
 	}
 	return as.Wait()
 }
 
-func UniqueFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) []E1 {
-	s2 := make([]E1, 0)
-	m2 := make(map[E2]E1)
+func UniqueFunc[E any, K comparable](s []E, f func(e E) K) []E {
+	s2 := make([]E, 0)
+	m2 := make(map[K]E)
 	for _, v := range s {
 		k := f(v)
 		if _, ok := m2[k]; !ok {
@@ -39,8 +39,8 @@ func UniqueFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) []E1 {
 	return s2
 }
 
-func SliceToMapFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) map[E2]E1 {
-	m := make(map[E2]E1)
+func SliceToMapFunc[E any, K comparable](s []E, f func(e E) K) map[K]E {
+	m := make(map[K]E)
 	for _, v := range s {
 		k := f(v)
 		m[k] = v
@@ -48,8 +48,8 @@ func SliceToMapFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) map[E2]E1 {
 	return m
 }
 
-func GroupFunc[E1 any, E2 comparable](s []E1, f func(e E1) E2) map[E2][]E1 {
-	m := make(map[E2][]E1)
+func GroupFunc[E any, K comparable](s []E, f func(e E) K) map[K][]E {
+	m := make(map[K][]E)
 	for _, v := range s {
 		k := f(v)
 		m[k] = append(m[k], v)
