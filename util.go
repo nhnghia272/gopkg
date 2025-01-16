@@ -2,7 +2,6 @@ package gopkg
 
 import (
 	"encoding/json"
-	"slices"
 )
 
 func Convert[E1, E2 any](src E1, des E2) error {
@@ -93,7 +92,6 @@ func FilterFunc[E any](s []E, f func(e E) bool) []E {
 
 func FilterParallelFunc[E any](s []E, f func(e E) bool) ([]E, error) {
 	ok := make([]bool, len(s))
-	s2 := slices.Clone(s)
 	as := Async()
 	for i, v := range s {
 		as.Go(func() { ok[i] = f(v) })
@@ -101,13 +99,13 @@ func FilterParallelFunc[E any](s []E, f func(e E) bool) ([]E, error) {
 	if err := as.Wait(); err != nil {
 		return nil, err
 	}
-	filtered := make([]E, 0)
+	s2 := make([]E, 0)
 	for i := range ok {
 		if ok[i] {
-			filtered = append(filtered, s2[i])
+			s2 = append(s2, s[i])
 		}
 	}
-	return filtered, nil
+	return s2, nil
 }
 
 func FindFunc[E any](s []E, f func(e E) bool) (E, bool) {
