@@ -26,6 +26,42 @@ func LoopParallelFunc[E any](s []E, f func(e E)) error {
 	return as.Wait()
 }
 
+func LoopAsyncFunc[E any](s []E, f func(e E), wait bool) error {
+	as := Async()
+	for _, v := range s {
+		as.Go(func() { f(v) })
+	}
+	if wait {
+		return as.Wait()
+	}
+	return nil
+}
+
+func LoopWithIndexFunc[E any](s []E, f func(e E, i int)) {
+	for i, v := range s {
+		f(v, i)
+	}
+}
+
+func LoopWithIndexParallelFunc[E any](s []E, f func(e E, i int)) error {
+	as := Async()
+	for i, v := range s {
+		as.Go(func() { f(v, i) })
+	}
+	return as.Wait()
+}
+
+func LoopWithIndexAsyncFunc[E any](s []E, f func(e E, i int), wait bool) error {
+	as := Async()
+	for i, v := range s {
+		as.Go(func() { f(v, i) })
+	}
+	if wait {
+		return as.Wait()
+	}
+	return nil
+}
+
 func UniqueFunc[E any, K comparable](s []E, f func(e E) K) []E {
 	s2 := make([]E, 0)
 	m2 := make(map[K]E)
