@@ -82,12 +82,10 @@ func (s CacheShard[E]) Get(key string) (E, error) {
 
 	val, ok := shard.items[key]
 	if !ok {
-		return val, errors.New("key not found")
+		return *new(E), errors.New("key not found")
 	}
 	if exp := shard.expires[key]; !exp.IsZero() && exp.Before(time.Now()) {
-		delete(shard.items, key)
-		delete(shard.expires, key)
-		return val, errors.New("key is expired")
+		return *new(E), errors.New("key is expired")
 	}
 
 	return val, nil
