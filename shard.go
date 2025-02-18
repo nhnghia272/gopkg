@@ -15,54 +15,18 @@ type cache[E any] struct {
 	expires map[string]time.Time
 }
 
-func (s *cache[E]) clean() {
-	s.Lock()
-	defer s.Unlock()
-	keys := make([]string, 0)
-	for key, exp := range s.expires {
-		if !exp.IsZero() && exp.Before(time.Now()) {
-			keys = append(keys, key)
-		}
-	}
-	for _, key := range keys {
-		delete(s.items, key)
-		delete(s.expires, key)
-	}
-}
-
-type CacheConfig struct {
-	Shard int
-	Clean time.Duration
-}
-
-func NewCacheShard[E any](config ...CacheConfig) CacheShard[E] {
-	cfg := CacheConfig{Shard: 1, Clean: time.Second * 30}
-
-	if len(config) > 0 {
-		if config[0].Shard > 0 {
-			cfg.Shard = config[0].Shard
-		}
-		if config[0].Clean > 0 {
-			cfg.Clean = config[0].Clean
-		}
+func NewCacheShard[E any](shard uint) CacheShard[E] {
+	if shard == 0 {
+		shard = 1
 	}
 
-	var (
-		as     = Async()
-		shards = make(CacheShard[E], cfg.Shard)
-	)
+	var shards = make(CacheShard[E], shard)
 
-	for i := 0; i < cfg.Shard; i++ {
+	for i := 0; i < int(shard); i++ {
 		shards[i] = &cache[E]{
 			items:   make(map[string]E),
 			expires: make(map[string]time.Time),
 		}
-		as.Go(func() {
-			for {
-				shards[i].clean()
-				time.Sleep(cfg.Clean)
-			}
-		})
 	}
 
 	return shards

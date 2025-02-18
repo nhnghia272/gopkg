@@ -19,7 +19,7 @@ import (
 func main() {
 	// Initialize a new Async
 	as := gopkg.Async()
-	cache := gopkg.NewCacheShard[string](gopkg.CacheConfig{Shard: 1})
+	cache := gopkg.NewCacheShard[string](1)
 
 	// Add goroutine
 	as.Go(func() {
@@ -37,17 +37,9 @@ func main() {
 
 	gopkg.LoopParallelFunc(arr, func(e int) { fmt.Println("LoopParallelFunc:", e) })
 
-	gopkg.LoopAsyncFunc(arr, func(e int) { fmt.Println("LoopAsyncFunc with wait:", e) }, true)
-
-	gopkg.LoopAsyncFunc(arr, func(e int) { fmt.Println("LoopAsyncFunc without wait:", e) }, false)
-
 	gopkg.LoopWithIndexFunc(arr, func(e int, i int) { fmt.Println("LoopWithIndexFunc:", e, i) })
 
 	gopkg.LoopWithIndexParallelFunc(arr, func(e int, i int) { fmt.Println("LoopWithIndexParallelFunc:", e, i) })
-
-	gopkg.LoopWithIndexAsyncFunc(arr, func(e int, i int) { fmt.Println("LoopWithIndexAsyncFunc with wait:", e, i) }, true)
-
-	gopkg.LoopWithIndexAsyncFunc(arr, func(e int, i int) { fmt.Println("LoopWithIndexAsyncFunc without wait:", e, i) }, false)
 
 	fmt.Println("UniqueFunc:", gopkg.UniqueFunc(arr, func(e int) int { return e }))
 
