@@ -15,55 +15,21 @@ type cache[E any] struct {
 	expires map[string]time.Time
 }
 
-type CacheShardOption struct {
-	Shard uint
-	Clean time.Duration
-}
-
-func NewCacheShard[E any](opts ...*CacheShardOption) CacheShard[E] {
-	opt := &CacheShardOption{Shard: 5, Clean: time.Minute}
-
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-	if opt.Shard == 0 {
-		opt.Shard = 5
-	}
-	if opt.Clean <= 0 {
-		opt.Clean = time.Minute
+func NewCacheShard[E any](shard uint) CacheShard[E] {
+	if shard == 0 {
+		shard = 1
 	}
 
-	var shards = make(CacheShard[E], opt.Shard)
+	var shards = make(CacheShard[E], shard)
 
-	for i := 0; i < int(opt.Shard); i++ {
+	for i := 0; i < int(shard); i++ {
 		shards[i] = &cache[E]{
 			items:   make(map[string]E),
 			expires: make(map[string]time.Time),
 		}
 	}
 
-	Async().Go(func() {
-		for {
-			shards.clean()
-			time.Sleep(opt.Clean)
-		}
-	})
-
 	return shards
-}
-
-func (s CacheShard[E]) clean() {
-	for _, shard := range s {
-		shard.Lock()
-		defer shard.Unlock()
-
-		for key, exp := range shard.expires {
-			if !exp.IsZero() && exp.Before(time.Now()) {
-				delete(shard.items, key)
-				delete(shard.expires, key)
-			}
-		}
-	}
 }
 
 func (s CacheShard[E]) acquire(key string) *cache[E] {
