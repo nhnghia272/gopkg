@@ -19,7 +19,7 @@ import (
 func main() {
 	// Initialize a new Async
 	as := gopkg.Async()
-	cache := gopkg.NewCacheShard[string](1)
+	cache := gopkg.NewCacheShard[string]()
 
 	// Add goroutine
 	as.Go(func() {

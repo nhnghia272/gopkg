@@ -15,21 +15,55 @@ type cache[E any] struct {
 	expires map[string]time.Time
 }
 
-func NewCacheShard[E any](shard uint) CacheShard[E] {
-	if shard == 0 {
-		shard = 1
+type CacheShardOption struct {
+	Shard uint
+	Clean time.Duration
+}
+
+func NewCacheShard[E any](opts ...*CacheShardOption) CacheShard[E] {
+	opt := &CacheShardOption{Shard: 5, Clean: time.Minute}
+
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+	if opt.Shard == 0 {
+		opt.Shard = 5
+	}
+	if opt.Clean <= 0 {
+		opt.Clean = time.Minute
 	}
 
-	var shards = make(CacheShard[E], shard)
+	var shards = make(CacheShard[E], opt.Shard)
 
-	for i := 0; i < int(shard); i++ {
+	for i := 0; i < int(opt.Shard); i++ {
 		shards[i] = &cache[E]{
 			items:   make(map[string]E),
 			expires: make(map[string]time.Time),
 		}
 	}
 
+	Async().Go(func() {
+		for {
+			shards.clean()
+			time.Sleep(opt.Clean)
+		}
+	})
+
 	return shards
+}
+
+func (s CacheShard[E]) clean() {
+	for _, shard := range s {
+		shard.Lock()
+		defer shard.Unlock()
+
+		for key, exp := range shard.expires {
+			if !exp.IsZero() && exp.Before(time.Now()) {
+				delete(shard.items, key)
+				delete(shard.expires, key)
+			}
+		}
+	}
 }
 
 func (s CacheShard[E]) acquire(key string) *cache[E] {
@@ -55,7 +89,7 @@ func (s CacheShard[E]) Get(key string) (E, error) {
 	return val, nil
 }
 
-func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
+func (s CacheShard[E]) Set(key string, val E, exp time.Duration) {
 	shard := s.acquire(key)
 
 	shard.Lock()
@@ -66,11 +100,9 @@ func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
 	if exp >= 0 {
 		shard.expires[key] = time.Now().Add(exp)
 	}
-
-	return nil
 }
 
-func (s CacheShard[E]) Delete(key string) error {
+func (s CacheShard[E]) Delete(key string) {
 	shard := s.acquire(key)
 
 	shard.Lock()
@@ -78,11 +110,9 @@ func (s CacheShard[E]) Delete(key string) error {
 
 	delete(shard.items, key)
 	delete(shard.expires, key)
-
-	return nil
 }
 
-func (s CacheShard[E]) Reset() error {
+func (s CacheShard[E]) Reset() {
 	for _, shard := range s {
 		shard.Lock()
 		defer shard.Unlock()
@@ -90,7 +120,6 @@ func (s CacheShard[E]) Reset() error {
 		shard.items = make(map[string]E)
 		shard.expires = make(map[string]time.Time)
 	}
-	return nil
 }
 
 func (s CacheShard[E]) Keys() []string {
