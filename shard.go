@@ -22,7 +22,7 @@ func NewCacheShard[E any](shard uint) CacheShard[E] {
 
 	var shards = make(CacheShard[E], shard)
 
-	for i := 0; i < int(shard); i++ {
+	for i := range shards {
 		shards[i] = &cache[E]{
 			items:   make(map[string]E),
 			expires: make(map[string]time.Time),
@@ -85,6 +85,20 @@ func (s CacheShard[E]) Reset() {
 
 		shard.items = make(map[string]E)
 		shard.expires = make(map[string]time.Time)
+	}
+}
+
+func (s CacheShard[E]) Clean() {
+	for _, shard := range s {
+		shard.Lock()
+		defer shard.Unlock()
+
+		for key, exp := range shard.expires {
+			if !exp.IsZero() && exp.Before(time.Now()) {
+				delete(shard.items, key)
+				delete(shard.expires, key)
+			}
+		}
 	}
 }
 
