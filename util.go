@@ -128,9 +128,9 @@ func FindFunc[E any](s []E, f func(e E) bool) (E, bool) {
 	return *new(E), false
 }
 
-func ReduceFunc[E1, E2 any](s []E1, a E2, f func(a E2, e E1) E2) E2 {
+func ReduceFunc[E1, E2 any](s []E1, t E2, f func(t E2, e E1) E2) E2 {
 	for _, v := range s {
-		a = f(a, v)
+		t = f(t, v)
 	}
-	return a
+	return t
 }
