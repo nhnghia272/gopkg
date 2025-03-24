@@ -55,7 +55,7 @@ func (s CacheShard[E]) Get(key string) (E, error) {
 	return val, nil
 }
 
-func (s CacheShard[E]) Set(key string, val E, exp time.Duration) {
+func (s CacheShard[E]) Set(key string, val E, exp time.Duration) error {
 	shard := s.acquire(key)
 
 	shard.Lock()
@@ -66,9 +66,11 @@ func (s CacheShard[E]) Set(key string, val E, exp time.Duration) {
 	if exp >= 0 {
 		shard.expires[key] = time.Now().Add(exp)
 	}
+
+	return nil
 }
 
-func (s CacheShard[E]) Delete(key string) {
+func (s CacheShard[E]) Delete(key string) error {
 	shard := s.acquire(key)
 
 	shard.Lock()
@@ -76,6 +78,8 @@ func (s CacheShard[E]) Delete(key string) {
 
 	delete(shard.items, key)
 	delete(shard.expires, key)
+
+	return nil
 }
 
 func (s CacheShard[E]) Reset() {
