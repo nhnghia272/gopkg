@@ -12,6 +12,11 @@ func Convert[E1, E2 any](src E1, des E2) error {
 	return json.Unmarshal(bytes, des)
 }
 
+func Transform[E1, E2 any](src E1) (E2, error) {
+	var des E2
+	return des, Convert(src, &des)
+}
+
 func LoopFunc[E any](s []E, f func(e E)) {
 	for _, v := range s {
 		f(v)

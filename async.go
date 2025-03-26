@@ -23,7 +23,7 @@ func (s *async) Wait() error {
 	return s.err
 }
 
-func (s *async) WaitErrs() []error {
+func (s *async) Waits() []error {
 	s.wg.Wait()
 	return s.errs
 }
