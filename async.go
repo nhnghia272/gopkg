@@ -41,7 +41,7 @@ func (s *async) Go(fn func()) *async {
 				s.errs[i] = fmt.Errorf("%v", r)
 				s.one.Do(func() {
 					s.err = s.errs[i]
-					os.Stderr.WriteString(fmt.Sprintf("panic: %v\n%s\n", r, debug.Stack()))
+					fmt.Fprintf(os.Stderr, "panic: %v\n%s\n", r, debug.Stack())
 				})
 			}
 		}()
